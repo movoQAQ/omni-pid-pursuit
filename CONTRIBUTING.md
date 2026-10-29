@@ -58,6 +58,6 @@ be under the Apache 2 License, as dictated by that
    with Licensor regarding such Contributions.
 ~~~
 
-[issues]: https://github.com/SMBU-PolarBear-Robot-Team/pb_omni_pid_pursuit_controller/issues
-[closed-issues]: https://github.com/SMBU-PolarBear-Robot-Team/pb_omni_pid_pursuit_controller/issues?utf8=%E2%9C%93&q=is%3Aissue%20is%3Aclosed%20
-[help-wanted]: https://github.com/SMBU-PolarBear-Robot-Team/pb_omni_pid_pursuit_controller/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22
+[issues]: https://github.com/movoQAQ/omni-pid-pursuit/issues
+[closed-issues]: https://github.com/movoQAQ/omni-pid-pursuit/issues?utf8=%E2%9C%93&q=is%3Aissue%20is%3Aclosed%20
+[help-wanted]: https://github.com/movoQAQ/omni-pid-pursuit/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22

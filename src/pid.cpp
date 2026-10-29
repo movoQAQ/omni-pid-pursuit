@@ -14,48 +14,53 @@
 
 #include "pb_omni_pid_pursuit_controller/pid.hpp"
 
-PID::PID(double dt, double max, double min, double kp, double kd, double ki)
-: dt_(dt), max_(max), min_(min), kp_(kp), kd_(kd), ki_(ki), pre_error_(0), integral_(0)
+#include <algorithm>
+#include <cmath>
+#include <stdexcept>
+
+PID::PID(double dt, double max, double min, double kp, double kd, double ki, double integral_limit)
+: integral_limit_(integral_limit),
+  dt_(dt),
+  max_(max),
+  min_(min),
+  kp_(kp),
+  kd_(kd),
+  ki_(ki),
+  pre_error_(0),
+  integral_(0)
 {
+  if (
+    !std::isfinite(dt) || dt <= 0 || !std::isfinite(max) || !std::isfinite(min) || min > max ||
+    !std::isfinite(integral_limit) || integral_limit < 0 || !std::isfinite(kp) ||
+    !std::isfinite(kd) || !std::isfinite(ki)) {
+    throw std::invalid_argument("Invalid PID configuration");
+  }
 }
 
 double PID::calculate(double set_point, double pv)
 {
-  // Calculate error
-  double error = set_point - pv;
-
-  // Proportional term
-  double p_out = kp_ * error;
-
-  // Integral term
-  integral_ += error * dt_;
-  double i_out = ki_ * integral_;
-
-  if (integral_ > 1) {
-    integral_ = 1;
-  } else if (integral_ < -1) {
-    integral_ = -1;
+  if (!std::isfinite(set_point) || !std::isfinite(pv)) {
+    throw std::invalid_argument("Non-finite PID input");
   }
-
-  // Derivative term
-  double derivative = (error - pre_error_) / dt_;
-  double d_out = kd_ * derivative;
-
-  // Calculate total output
-  double output = p_out + i_out + d_out;
-
-  // Restrict to max/min
-  if (output > max_)
-    output = max_;
-  else if (output < min_)
-    output = min_;
-
-  // Save error to previous error
+  const double error = set_point - pv;
+  integral_ = std::clamp(integral_ + error * dt_, -integral_limit_, integral_limit_);
+  const double derivative = first_sample_ ? 0 : (error - pre_error_) / dt_;
+  const double output = kp_ * error + ki_ * integral_ + kd_ * derivative;
   pre_error_ = error;
-
-  return output;
+  first_sample_ = false;
+  return std::clamp(output, min_, max_);
 }
 
-void PID::setSumError(double sum_error) { integral_ = sum_error; }
-
-PID::~PID() {}
+void PID::setSumError(double sum_error)
+{
+  if (!std::isfinite(sum_error)) {
+    throw std::invalid_argument("Non-finite PID integral");
+  }
+  integral_ = std::clamp(sum_error, -integral_limit_, integral_limit_);
+}
+void PID::reset()
+{
+  integral_ = pre_error_ = 0;
+  first_sample_ = true;
+}
+PID::~PID() = default;

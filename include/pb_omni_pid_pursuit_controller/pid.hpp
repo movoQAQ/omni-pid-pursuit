@@ -24,14 +24,19 @@ public:
   // dt -  loop interval time
   // max - maximum value of manipulated variable
   // min - minimum value of manipulated variable
-  PID(double dt, double max, double min, double kp, double kd, double ki);
+  PID(
+    double dt, double max, double min, double kp, double kd, double ki,
+    double integral_limit = 1.0);
 
   // Returns the manipulated variable given a set_point and current process value
   double calculate(double set_point, double pv);
   void setSumError(double sum_error);
+  void reset();
   ~PID();
 
 private:
+  double integral_limit_;
+  bool first_sample_{true};
   double dt_;
   double max_;
   double min_;
